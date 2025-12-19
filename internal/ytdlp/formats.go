@@ -2,12 +2,8 @@ package ytdlp
 
 import (
 	"encoding/json"
-	// "fmt"
 	"log"
-
-	// "log"
 	"os/exec"
-
 	"github.com/ayushsharma74/lazydlp/internal/domain"
 )
 
@@ -75,7 +71,6 @@ func (c *Client) ListFormats(url string) ([]domain.Format, error) {
 			IsAudio:    f.ACodec != "none",
 		})
 	}
-	// log.Println(formats)
 
 	return formats, nil
 

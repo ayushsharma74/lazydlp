@@ -23,14 +23,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl + c":
 			return m, tea.Quit
-		}		
+		}
 		switch m.step {
 
 		case stepURL:
 			if msg.Type == tea.KeyEnter {
 				url := m.textInput.Value()
 				m.step = stepLoading
-				return m, fetchFormatsCmd(url, m.app.GetFormats)
+				return m, tea.Batch(
+					m.spinner.Tick,
+					fetchFormatsCmd(url, m.app.GetFormats),
+				)
 			}
 
 		case stepFormats:
@@ -66,7 +69,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list = NewFormatList(msg.formats)
 		m.listReady = true
 
-		// 🔑 APPLY SIZE IMMEDIATELY
+		// APPLY SIZE IMMEDIATELY
 		if m.width > 0 && m.height > 0 {
 			m.list.SetSize(m.width, m.height-4)
 		}
@@ -99,10 +102,7 @@ func (m *Model) View() string {
 		)
 
 	case stepLoading:
-		return fmt.Sprintf(
-			"%s Fetching formats...\n",
-			m.spinner.View(),
-		)
+		return m.spinner.View() + " Fetching formats\n"
 
 	case stepFormats:
 		return m.list.View()

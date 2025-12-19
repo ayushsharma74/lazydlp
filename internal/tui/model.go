@@ -40,7 +40,7 @@ func NewModel(a *app.App) *Model {
 	ti.CharLimit = 150
 	ti.Width = 20
 	sp := spinner.New()
-	sp.Spinner = spinner.Line
+	sp.Spinner = spinner.Dot
 
 	return &Model{
 		app:       a,
