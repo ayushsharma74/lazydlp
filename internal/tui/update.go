@@ -37,6 +37,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case stepURL:
 			if msg.Type == tea.KeyEnter {
 				url := m.textInput.Value()
+				if url == "" {
+					return m, nil
+				}
 				m.url = url
 				m.step = stepLoading
 				return m, tea.Batch(
