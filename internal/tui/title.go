@@ -33,7 +33,7 @@ func titleArt() string {
 }
 
 func subtitle() string {
-	return "minimalistic downloader"
+	return "minimal downloader"
 }
 
 func StyledTitle(width int) string {
