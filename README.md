@@ -10,13 +10,14 @@ A minimal TUI downloader for YouTube (and 1700+ other sites), powered by **yt-dl
 ```bash
 brew tap ayushsharma74/tap
 brew install lazydlp
-
 ```
 
 ### Arch Linux (AUR)
 
 ```bash
+
 yay -S lazydlp-bin
+
 
 ```
 
@@ -26,9 +27,6 @@ yay -S lazydlp-bin
 go install github.com/ayushsharma74/lazydlp/cmd/lazydlp@latest
 
 ```
-
----
-
 ## Usage
 
 Simply run the command and follow the prompts:
@@ -49,5 +47,3 @@ lazydlp
 ## 📜 License
 
 [MIT](https://www.google.com/search?q=LICENSE) © Ayush Sharma
-
----
