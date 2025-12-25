@@ -50,6 +50,15 @@ brews:
     description: "A TUI for yt-dlp written in Go."
     install: |
       bin.install "lazydlp"
+aurs:
+  - name: lazydlp-bin
+    # ... previous config ...
+    depends:
+      - yt-dlp
+    provides:
+      - lazydlp
+    conflicts:
+      - lazydlp
 
 changelog:
   sort: asc
