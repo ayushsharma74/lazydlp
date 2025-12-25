@@ -24,9 +24,10 @@ jobs:
           cache: true
       - name: Set up SSH key for AUR
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+         mkdir -p ~/.ssh
+          printf "%s" "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
