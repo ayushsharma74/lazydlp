@@ -2,9 +2,16 @@ package tui
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+const (
+	padding  = 2
+	maxWidth = 80
 )
 
 func (m *Model) Init() tea.Cmd {
@@ -29,6 +36,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case stepURL:
 			if msg.Type == tea.KeyEnter {
 				url := m.textInput.Value()
+				m.url = url
 				m.step = stepLoading
 				return m, tea.Batch(
 					m.spinner.Tick,
@@ -37,20 +45,52 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case stepFormats:
-
-			var cmd tea.Cmd
-			m.list, cmd = m.list.Update(msg)
-
 			if msg.Type == tea.KeyEnter {
-				m.step = stepDone
+				if selected, ok := m.list.SelectedItem().(formatItem); ok {
+					m.step = stepDone
+					log.Print(selected.ID)
+					formatID := selected.ID
+					return m, downloadCmd(m.url, formatID, m.app.DownloadFormat)
+				}
 			}
-
+			m.list, cmd = m.list.Update(msg)
 			return m, cmd
-
 		}
+	case beginDownloadMsg:
+		return m, waitForProgress(msg.ch)
+
+	case downloadProgressMsg:
+		log.Printf("TUI RECEIVED: %s", msg.update.Speed)
+		m.downloadSpeed = msg.update.Speed
+
+		// 1. Trigger the animation command using the actual percentage
+		progressCmd := m.progress.SetPercent(msg.update.Percent)
+
+		// 2. Update the progress model instance itself
+		// This is the "missing link" that processes the animation logic
+		newModel, cmd := m.progress.Update(msg)
+		if p, ok := newModel.(progress.Model); ok {
+			m.progress = p
+		}
+
+		// 3. Batch the internal progress command and our listener command
+		return m, tea.Batch(progressCmd, cmd, waitForProgress(msg.ch))
+
+	case downloadFinishedMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		return m, tea.Quit
+
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.progress.Width = msg.Width - padding*2 - 4
+
+		if m.progress.Width > maxWidth {
+			m.progress.Width = maxWidth
+		}
 
 		if m.listReady {
 			m.list.SetSize(msg.Width, msg.Height-4)
@@ -85,6 +125,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textInput, cmd = m.textInput.Update(msg)
 	}
 
+	if m.step == stepDone {
+		var progressCmd tea.Cmd
+		var newModel tea.Model
+
+		newModel, progressCmd = m.progress.Update(msg)
+		if p, ok := newModel.(progress.Model); ok {
+			m.progress = p
+		}
+		// Combine this with existing commands
+		cmd = tea.Batch(cmd, progressCmd)
+	}
+
 	return m, cmd
 }
 
@@ -97,18 +149,37 @@ func (m *Model) View() string {
 
 	case stepURL:
 		return fmt.Sprintf(
-			"Enter video URL:\n\n%s\n\nPress Enter to continue",
+			"\n\n%s\n\n Enter video URL:\n\n%s\n\nPress Enter to continue",
+			StyledTitle(m.width),
 			m.textInput.View(),
 		)
 
 	case stepLoading:
-		return m.spinner.View() + " Fetching formats\n"
+		return fmt.Sprintf(
+			"\n\n%s\n\n  %s Fetching Formats",
+			StyledTitle(m.width),
+			m.spinner.View(),
+		)
 
 	case stepFormats:
 		return m.list.View()
 
 	case stepDone:
-		return "Downloading...\n"
+		progressDone := m.progress.Percent()
+		speed := m.downloadSpeed
+		if progressDone == 0 {
+			progressDone = 0.0
+		}
+		if speed == "" {
+			speed = "calculating..."
+		}
+		return fmt.Sprintf(
+			"\n\n%s\n\n%s\n\n%s %0.1f%%\n",
+			StyledTitle(m.width),
+			speed,
+			m.progress.View(),
+			progressDone*100,
+		)
 	}
 
 	return ""

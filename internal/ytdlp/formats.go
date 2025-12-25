@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os/exec"
+
 	"github.com/ayushsharma74/lazydlp/internal/domain"
 )
 
@@ -12,11 +13,11 @@ type ytDlpJSON struct {
 }
 
 type ytFormat struct {
-	ID             string  `json:"id"`
+	ID             string  `json:"format_id"`
 	Ext            string  `json:"ext"`
 	Resolution     string  `json:"resolution"`
-	Filesize       int64  `json:"filesize"`
-	FilesizeApprox int64  `json:"filesize_approx"`
+	Filesize       int64   `json:"filesize"`
+	FilesizeApprox int64   `json:"filesize_approx"`
 	VCodec         string  `json:"vcodec"`
 	ACodec         string  `json:"acodec"`
 	FPS            float64 `json:"fps"`
@@ -36,7 +37,7 @@ func (c *Client) ListFormats(url string) ([]domain.Format, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var data ytDlpJSON
 
 	if err := json.Unmarshal(out, &data); err != nil {
@@ -44,7 +45,7 @@ func (c *Client) ListFormats(url string) ([]domain.Format, error) {
 	}
 
 	for _, f := range data.Formats {
-		log.Println(f)
+		log.Println(f.ID)
 	}
 
 	var formats []domain.Format

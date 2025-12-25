@@ -9,3 +9,20 @@ type formatsMsg struct {
 type errMsg struct {
 	err error
 }
+
+
+
+type beginDownloadMsg struct {
+	ch chan domain.ProgressUpdate
+}
+
+type downloadProgressMsg struct {
+	update domain.ProgressUpdate
+	ch     chan domain.ProgressUpdate
+}
+
+type downloadFinishedMsg struct {
+	err error
+}
+
+

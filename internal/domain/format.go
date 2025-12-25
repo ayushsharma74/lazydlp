@@ -9,3 +9,8 @@ type Format struct {
 	IsVideo    bool
 	IsAudio    bool
 }
+
+type ProgressUpdate struct {
+	Percent float64
+	Speed   string
+}
