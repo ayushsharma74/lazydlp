@@ -1,16 +1,9 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
-
-# The lines below are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/need to use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
-
 version: 2
+
+project_name: lazydlp
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
 
 builds:
@@ -27,7 +20,6 @@ builds:
 
 archives:
   - formats: [tar.gz]
-    # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -35,7 +27,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
     format_overrides:
       - goos: windows
         formats: [zip]
@@ -50,15 +41,27 @@ brews:
     description: "A TUI for yt-dlp written in Go."
     install: |
       bin.install "lazydlp"
+
 aurs:
   - name: lazydlp-bin
-    # ... previous config ...
+    homepage: "https://github.com/ayushsharma74/lazydlp"
+    description: "A TUI for yt-dlp written in Go."
+    maintainers:
+      - "Ayush Sharma <your@email.com>"
+    license: MIT
+    # Important: This tells the AUR where to download the binary
+    url_template: "https://github.com/ayushsharma74/lazydlp/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # Important: SSH URL for your AUR package
+    git_url: "ssh://aur@aur.archlinux.org/lazydlp-bin.git"
+    private_key: "{{ .Env.AUR_SSH_KEY }}"
     depends:
       - yt-dlp
     provides:
       - lazydlp
     conflicts:
       - lazydlp
+    package: |-
+      install -Dm755 "./lazydlp" "${pkgdir}/usr/bin/lazydlp"
 
 changelog:
   sort: asc
@@ -68,8 +71,9 @@ changelog:
       - "^test:"
 
 release:
+  github:
+    owner: ayushsharma74
+    name: lazydlp
   footer: >-
-
     ---
-
     Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
