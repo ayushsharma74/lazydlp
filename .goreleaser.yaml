@@ -36,6 +36,9 @@ brews:
     repository:
       owner: ayushsharma74
       name: homebrew-tap
+    dependencies:
+      - name: yt-dlp
+      - name: ffmpeg
     directory: Formula
     homepage: "https://github.com/ayushsharma74/lazydlp"
     description: "A TUI for yt-dlp written in Go."
