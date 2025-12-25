@@ -28,9 +28,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "q", "ctrl + c":
+		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
+
 		switch m.step {
 
 		case stepURL:
