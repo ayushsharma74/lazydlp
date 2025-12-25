@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*' # Trigger only when you push a tag starting with 'v'
+      - "v*" # Trigger only when you push a tag starting with 'v'
 
 permissions:
   contents: write # Needed to create the GitHub Release
@@ -20,8 +20,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22' # Match your local Go version
+          go-version: "1.22" # Match your local Go version
           cache: true
+      - name: Set up SSH key for AUR
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur_key
+          chmod 600 ~/.ssh/aur_key
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
@@ -30,5 +35,5 @@ jobs:
           version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          AUR_SSH_KEY: /home/runner/.ssh/aur_key
